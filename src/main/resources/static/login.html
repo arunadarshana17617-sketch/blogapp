@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — Spring Blog</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+    html, body { height: 100%; margin: 0; }
+    body { background: #121212; color: #fff; }
+
+    .page { min-height: 100%; display: grid; grid-template-columns: 1.05fr 1fr; }
+
+    /* ---------- Left brand panel ---------- */
+    .brand {
+      position: relative; overflow: hidden; color: #0f1c33; padding: 56px 56px 40px; margin: 18px; border-radius: 22px;
+      background: linear-gradient(135deg, #cfe4f7 0%, #a9cdee 100%);
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .brand::before, .brand::after { content: ""; position: absolute; border-radius: 50%; }
+    .brand::before { width: 440px; height: 440px; right: -150px; top: -130px; background: repeating-radial-gradient(circle, transparent 0 22px, rgba(37,99,255,.12) 22px 23px); }
+    .brand::after  { width: 260px; height: 260px; left: -80px; bottom: -80px; background: rgba(37,99,255,.12); }
+    .brand > * { position: relative; z-index: 1; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: .02em; text-transform: uppercase; }
+    .logo-mark { width: 38px; height: 38px; border-radius: 50%; background: #2563ff; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 18px; }
+    .brand h1 { font-size: 40px; line-height: 1.15; margin: 0 0 16px; max-width: 460px; letter-spacing: -.02em; }
+    .brand p.lead { font-size: 15px; line-height: 1.75; color: #3a4a66; max-width: 440px; margin: 0 0 28px; }
+    .points { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    .points li { display: inline-flex; gap: 12px; align-items: center; font-size: 14px; font-weight: 500; background: #fff; border-radius: 999px; padding: 6px 18px 6px 6px; width: fit-content; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+    .points .dot { width: 28px; height: 28px; border-radius: 50%; background: #2563ff; color: #fff; display: grid; place-items: center; font-size: 13px; flex: none; }
+    .brand small { color: #3a4a66; }
+
+    /* ---------- Right form panel ---------- */
+    .panel { display: flex; align-items: center; justify-content: center; padding: 32px 20px; }
+    .box { width: 100%; max-width: 400px; }
+    .mobile-logo { display: none; }
+    .back { display: inline-block; margin-bottom: 26px; color: #9a9a9a; text-decoration: none; font-size: 14px; }
+    .back:hover { color: #fff; }
+    h2 { margin: 0 0 6px; font-size: 28px; color: #fff; }
+    .sub { margin: 0 0 24px; color: #7d7d7d; font-size: 14px; }
+
+    #googleBtn { display: flex; justify-content: center; min-height: 44px; }
+    .hint { font-size: 13px; color: #7d7d7d; text-align: center; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; color: #7d7d7d; font-size: 12.5px; }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #2c2c2c; }
+
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; background: #1f1f1f; padding: 4px; border-radius: 999px; margin-bottom: 18px; }
+    .tab { border: none; background: transparent; padding: 10px 0; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #9a9a9a; cursor: pointer; }
+    .tab.active { background: #2563ff; color: #fff; }
+
+    label { display: block; font-size: 12.5px; font-weight: 600; margin: 14px 0 6px 4px; color: #b4b4b4; }
+    .field { position: relative; }
+    input {
+      width: 100%; padding: 13px 18px; border: 1px solid #2c2c2c; border-radius: 999px; font-size: 14px; color: #fff;
+      background: #1f1f1f; outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    input::placeholder { color: #6b6b6b; }
+    input:focus { border-color: #2563ff; box-shadow: 0 0 0 3px rgba(37,99,255,.2); }
+    .toggle-pw { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: none; color: #9db8ff; font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 6px; }
+    .submit { width: 100%; margin-top: 24px; padding: 13px; border: none; border-radius: 999px; background: #2563ff; color: #fff; font-size: 14.5px; font-weight: 700; cursor: pointer; transition: background .15s; }
+    .submit:hover { background: #1d4fe0; }
+    .submit:disabled { opacity: .6; cursor: wait; }
+    .msg { margin-top: 14px; font-size: 13.5px; min-height: 20px; text-align: center; }
+    .msg.error { color: #ff8a80; }
+    .msg.ok { color: #4ade80; }
+    .hidden { display: none; }
+
+    @media (max-width: 860px) {
+      .page { grid-template-columns: 1fr; }
+      .brand { display: none; }
+      .mobile-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Left: brand -->
+    <section class="brand">
+      <div class="logo"><span class="logo-mark">B</span> <span>Spring<span style="color:#2563ff">.</span>Blog</span></div>
+
+      <div>
+        <h1>Share your stories with the world.</h1>
+        <p class="lead">Write blogs, add photos and join the conversation — sign in once and start publishing.</p>
+        <ul class="points">
+          <li><span class="dot">✓</span> Publish blogs with photos in seconds</li>
+          <li><span class="dot">✓</span> Comment and reply on any post</li>
+          <li><span class="dot">✓</span> Sign in with Google — no password needed</li>
+        </ul>
+      </div>
+
+      <small>© Spring Blog</small>
+    </section>
+
+    <!-- Right: form -->
+    <section class="panel">
+      <div class="box">
+        <div class="mobile-logo"><span class="logo-mark">B</span> <span>Spring<span style="color:#2563ff">.</span>Blog</span></div>
+        <a class="back" href="index.html">← Back to blogs</a>
+
+        <h2 id="title">Welcome back</h2>
+        <p class="sub" id="subtitle">Sign in to write a blog and join the conversation.</p>
+
+        <div id="googleBtn"></div>
+
+        <div class="divider">or continue with username</div>
+
+        <div class="tabs">
+          <button type="button" class="tab active" id="tabLogin" onclick="setMode('login')">Sign in</button>
+          <button type="button" class="tab" id="tabRegister" onclick="setMode('register')">Create account</button>
+        </div>
+
+        <form id="authForm" onsubmit="submitForm(event)" novalidate>
+          <label for="username">Username</label>
+          <input id="username" type="text" autocomplete="username" placeholder="Your username" />
+
+          <label for="password">Password</label>
+          <div class="field">
+            <input id="password" type="password" autocomplete="current-password" placeholder="Your password" />
+            <button type="button" class="toggle-pw" onclick="togglePw()">Show</button>
+          </div>
+
+          <div id="confirmWrap" class="hidden">
+            <label for="confirm">Confirm password</label>
+            <input id="confirm" type="password" autocomplete="new-password" placeholder="Re-enter password" />
+          </div>
+
+          <button class="submit" id="submitBtn" type="submit">Sign in</button>
+          <div class="msg" id="msg"></div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API = "http://localhost:8080/api";
+    let mode = "login";
+
+    // Already signed in? go straight to the blogs.
+    try {
+      if (JSON.parse(localStorage.getItem("blog_user") || "null")) location.replace("index.html");
+    } catch (e) {}
+
+    const $ = id => document.getElementById(id);
+
+    function setMode(m) {
+      mode = m;
+      const reg = m === "register";
+      $("tabLogin").classList.toggle("active", !reg);
+      $("tabRegister").classList.toggle("active", reg);
+      $("confirmWrap").classList.toggle("hidden", !reg);
+      $("title").textContent = reg ? "Create your account" : "Welcome back";
+      $("subtitle").textContent = reg
+        ? "It takes a few seconds. Then you can start writing."
+        : "Sign in to write a blog and join the conversation.";
+      $("submitBtn").textContent = reg ? "Create account" : "Sign in";
+      $("password").autocomplete = reg ? "new-password" : "current-password";
+      showMsg("");
+    }
+
+    function togglePw() {
+      const p = $("password");
+      const show = p.type === "password";
+      p.type = show ? "text" : "password";
+      document.querySelector(".toggle-pw").textContent = show ? "Hide" : "Show";
+    }
+
+    function showMsg(text, type) {
+      const el = $("msg");
+      el.textContent = text || "";
+      el.className = "msg" + (type ? " " + type : "");
+    }
+
+    function finishLogin(data) {
+      localStorage.setItem("blog_user", JSON.stringify({
+        userId: data.userId, username: data.username, email: data.email, picture: data.picture
+      }));
+      showMsg("Signed in! Redirecting…", "ok");
+      location.href = "index.html";
+    }
+
+    async function postJson(path, body) {
+      const res = await fetch(API + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      let data = {};
+      try { data = await res.json(); } catch (e) {}
+      return { ok: res.ok, data };
+    }
+
+    async function submitForm(e) {
+      e.preventDefault();
+      const username = $("username").value.trim();
+      const password = $("password").value;
+      if (!username || !password) return showMsg("Enter your username and password", "error");
+
+      if (mode === "register") {
+        if (password.length < 4) return showMsg("Password must be at least 4 characters", "error");
+        if (password !== $("confirm").value) return showMsg("Passwords do not match", "error");
+      }
+
+      const btn = $("submitBtn");
+      btn.disabled = true;
+      showMsg("");
+      try {
+        if (mode === "register") {
+          const r = await postJson("/auth/register", { username, password });
+          if (!r.ok) return showMsg(r.data.message || "Could not create account", "error");
+        }
+        const r = await postJson("/auth/login", { username, password });
+        if (!r.ok) return showMsg(r.data.message || "Login failed", "error");
+        finishLogin(r.data);
+      } catch (err) {
+        showMsg("Cannot reach the server. Is the app running?", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ---------- Google Sign-In ----------
+    async function initGoogle() {
+      const slot = $("googleBtn");
+      let clientId = "";
+      try {
+        const res = await fetch(`${API}/auth/config`);
+        clientId = (await res.json()).googleClientId || "";
+      } catch (e) {}
+
+      if (!clientId) {
+        slot.innerHTML = '<div class="hint">Google sign-in is not set up yet (add google.client-id).</div>';
+        return;
+      }
+      google.accounts.id.initialize({ client_id: clientId, callback: onGoogle });
+      slot.innerHTML = "";
+      google.accounts.id.renderButton(slot, {
+        type: "standard", theme: "filled_black", size: "large", text: "continue_with",
+        shape: "pill", logo_alignment: "left",
+        width: Math.max(200, Math.min(400, slot.clientWidth || 360))
+      });
+    }
+
+    async function onGoogle(response) {
+      showMsg("Signing in with Google…");
+      try {
+        const r = await postJson("/auth/google", { credential: response.credential });
+        if (!r.ok) return showMsg(r.data.message || "Google login failed", "error");
+        finishLogin(r.data);
+      } catch (err) {
+        showMsg("Cannot reach the server. Is the app running?", "error");
+      }
+    }
+
+    $("googleBtn").innerHTML = '<div class="hint">Loading Google sign-in…</div>';
+  </script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogle()"></script>
+</body>
+</html>

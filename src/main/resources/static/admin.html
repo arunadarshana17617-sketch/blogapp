@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Spring Blog</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --panel: #121212;
+      --card: #1b1b1b;
+      --card-2: #232323;
+      --line: #2a2a2a;
+      --line-2: #3a3a3a;
+      --text: #ffffff;
+      --text-2: #b4b4b4;
+      --text-3: #7d7d7d;
+      --blue: #2563ff;
+      --blue-2: #1d4fe0;
+      --blue-soft: rgba(37,99,255,.16);
+      --red: #e5484d;
+      --green: #22c55e;
+      --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+    :focus { outline: none; }
+    :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    ::selection { background: var(--blue); color: #fff; }
+
+    /* ---------- Buttons & inputs ---------- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid transparent; border-radius: 999px;
+      padding: 9px 18px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s, color .15s; color: var(--text); background: none; white-space: nowrap; }
+    .btn.primary { background: var(--blue); color: #fff; }
+    .btn.primary:hover { background: var(--blue-2); }
+    .btn:disabled { opacity: .6; cursor: wait; }
+    .btn.outline { border-color: var(--line-2); }
+    .btn.outline:hover { border-color: var(--text-3); background: var(--card-2); }
+    .btn.danger { border-color: #5a2a2c; color: #ff8a80; }
+    .btn.danger:hover { background: var(--red); border-color: var(--red); color: #fff; }
+    .btn.danger-solid { background: var(--red); color: #fff; }
+    .btn.danger-solid:hover { background: #c93b40; }
+    .btn.sm { padding: 6px 12px; font-size: 12.5px; }
+    .btn.icon { width: 32px; height: 32px; padding: 0; }
+    .in { width: 100%; border: 1px solid var(--line-2); border-radius: 12px; padding: 11px 14px; font: inherit; font-size: 14px; color: var(--text); background: var(--card-2); accent-color: var(--blue); }
+    .in::placeholder { color: var(--text-3); }
+    .in:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+    select.in { appearance: none; padding-right: 38px; background-image: linear-gradient(45deg, transparent 50%, #999 50%), linear-gradient(135deg, #999 50%, transparent 50%); background-position: calc(100% - 18px) 52%, calc(100% - 13px) 52%; background-size: 5px 5px; background-repeat: no-repeat; }
+    textarea.in { resize: vertical; line-height: 1.6; }
+    input[type=file].in { padding: 8px 12px; }
+    label.lbl { display: block; font-size: 12.5px; font-weight: 600; margin: 0 0 7px 2px; color: var(--text-2); }
+
+    .avatar { width: 32px; height: 32px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 12.5px; font-weight: 700; flex: none; object-fit: cover; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; letter-spacing: .02em; text-transform: uppercase; }
+    .logo-mark { width: 34px; height: 34px; border-radius: 50%; background: var(--blue); display: grid; place-items: center; flex: none; }
+    .logo-mark svg { width: 17px; height: 17px; }
+
+    /* ---------- Login ---------- */
+    .login { min-height: 100%; display: grid; place-items: center; padding: 24px; background:
+      radial-gradient(600px 400px at 80% 0%, rgba(37,99,255,.18), transparent 70%), var(--bg); }
+    .login-card { width: 100%; max-width: 400px; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 36px 32px 30px; }
+    .login-card .logo { margin-bottom: 26px; }
+    .login-card h1 { margin: 0 0 6px; font-size: 24px; }
+    .login-card p.sub { margin: 0 0 24px; color: var(--text-3); font-size: 13.5px; }
+    .login-card .field { margin-bottom: 14px; }
+    .login-card .in { border-radius: 999px; padding: 12px 18px; }
+    .login-card .btn { width: 100%; padding: 12px; margin-top: 8px; font-size: 14.5px; }
+    .lmsg { min-height: 20px; margin-top: 12px; text-align: center; font-size: 13px; color: #ff8a80; }
+    .login-card .back { display: block; text-align: center; margin-top: 18px; color: var(--text-3); font-size: 13px; }
+    .login-card .back:hover { color: #fff; }
+
+    /* ---------- Shell ---------- */
+    .shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100%; }
+    .side { background: var(--panel); border-right: 1px solid var(--line); padding: 26px 18px; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 0; height: 100vh; }
+    .side .logo { padding: 0 8px 22px; }
+    .side .tagline { margin: -14px 8px 22px 52px; font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 12px; width: 100%; border: none; background: none; color: var(--text-2); font-size: 14px; font-weight: 500; padding: 11px 14px; border-radius: 12px; cursor: pointer; text-align: left; }
+    .nav-item:hover { background: var(--card); color: #fff; }
+    .nav-item.on { background: var(--blue); color: #fff; font-weight: 700; }
+    .nav-item .badge { margin-left: auto; font-size: 11px; background: var(--card-2); color: var(--text-2); padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+    .nav-item.on .badge { background: rgba(255,255,255,.2); color: #fff; }
+    .side .spacer { flex: 1; }
+    .side hr { border: none; border-top: 1px solid var(--line); margin: 10px 0; width: 100%; }
+
+    .main { padding: 0 36px 60px; min-width: 0; }
+    .top { display: flex; align-items: center; gap: 16px; height: 84px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+    .top h1 { margin: 0; font-size: 22px; font-weight: 700; }
+    .top .crumb { font-size: 12px; color: var(--text-3); }
+    .top .right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .admin-pill { display: inline-flex; align-items: center; gap: 9px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px 4px 4px; font-size: 13px; font-weight: 600; }
+    .admin-pill .avatar { background: var(--blue); color: #fff; width: 30px; height: 30px; }
+    .menu-btn { display: none; }
+
+    /* ---------- Dashboard ---------- */
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 22px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; display: flex; gap: 16px; align-items: center; }
+    .stat .ico { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: var(--blue-soft); color: #9db8ff; flex: none; }
+    .stat .k { font-size: 12.5px; color: var(--text-3); }
+    .stat .v { font-size: 26px; font-weight: 700; line-height: 1.2; }
+    .stat .v small { font-size: 12px; color: var(--text-2); font-weight: 500; }
+    .grid2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; }
+    .box { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; min-width: 0; }
+    .box h2 { margin: 0 0 18px; font-size: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .box h2 .linkbtn { font-size: 12.5px; }
+    .bars { display: grid; gap: 14px; }
+    .bar-row { display: grid; grid-template-columns: 90px minmax(0, 1fr) 34px; gap: 12px; align-items: center; font-size: 13px; }
+    .bar-row .name { color: var(--text-2); }
+    .bar-track { height: 10px; background: var(--card-2); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; background: var(--c, var(--blue)); }
+    .bar-row .n { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .mini { display: grid; gap: 4px; }
+    .mini-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .mini-row:last-child { border-bottom: none; }
+    .mini-row .t { flex: 1; min-width: 0; }
+    .mini-row .t b { display: block; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mini-row .t span { font-size: 12px; color: var(--text-3); }
+    .mini-row .num { font-weight: 700; font-size: 13px; }
+    .linkbtn { background: none; border: none; color: #9db8ff; font-weight: 600; cursor: pointer; padding: 0; font-size: 13px; }
+    .linkbtn:hover { color: #fff; }
+
+    /* ---------- Tables ---------- */
+    .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .search { position: relative; flex: 1; max-width: 340px; min-width: 200px; }
+    .search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-2); pointer-events: none; }
+    .search input { width: 100%; border: 1px solid transparent; background: var(--card-2); border-radius: 999px; padding: 11px 16px 11px 42px; font: inherit; font-size: 13.5px; color: #fff; }
+    .search input::placeholder { color: var(--text-3); }
+    .search input:focus { outline: none; border-color: var(--blue); }
+    .toolbar select.in { width: auto; border-radius: 999px; padding: 10px 40px 10px 16px; font-size: 13px; }
+    .toolbar .count { margin-left: auto; color: var(--text-3); font-size: 12.5px; }
+    .chip-filter { display: inline-flex; align-items: center; gap: 8px; background: var(--blue-soft); color: #9db8ff; padding: 6px 8px 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600; }
+    .chip-filter button { border: none; background: rgba(255,255,255,.1); color: #fff; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; line-height: 1; }
+
+    .table-wrap { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); padding: 14px 16px; background: #171717; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: 13.5px; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #202020; }
+    td.actions { text-align: right; white-space: nowrap; }
+    td.actions .btn + .btn { margin-left: 6px; }
+    .cell-post { display: flex; align-items: center; gap: 14px; min-width: 260px; }
+    .thumb { width: 64px; height: 46px; border-radius: 10px; overflow: hidden; background: var(--card-2); flex: none; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ph { width: 100%; height: 100%; display: grid; place-items: center; background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--c) 55%, #1b1b1b), #161616 80%); color: rgba(255,255,255,.85); font-weight: 800; font-size: 18px; }
+    .cell-post b { display: block; max-width: 340px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cell-post span { font-size: 12px; color: var(--text-3); display: block; max-width: 340px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .who { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+    .who small { display: block; color: var(--text-3); font-size: 12px; }
+    .tag { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+    .pill { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--card-2); color: var(--text-2); }
+    .pill.google { background: var(--blue-soft); color: #9db8ff; }
+    .pill.reply { background: rgba(168,85,247,.16); color: #d8b4fe; }
+    .muted { color: var(--text-3); font-size: 12.5px; white-space: nowrap; }
+    .comment-text { max-width: 380px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #d6d6d6; }
+    .num-cell { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .empty { text-align: center; padding: 56px 20px; color: var(--text-3); }
+    .empty h3 { margin: 0 0 6px; color: #fff; font-size: 17px; }
+    .skel { height: 54px; margin: 14px 16px; border-radius: 12px; background: linear-gradient(90deg, var(--card), var(--card-2), var(--card)); background-size: 200% 100%; animation: sh 1.4s infinite; }
+    @keyframes sh { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    /* ---------- Overlays ---------- */
+    .overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.72); overflow-y: auto; padding: 40px 16px; opacity: 0; transition: opacity .18s; }
+    .overlay.show { opacity: 1; }
+    .sheet { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 20px; margin: 0 auto; max-width: 680px; transform: translateY(14px); transition: transform .18s; overflow: hidden; }
+    .overlay.show .sheet { transform: none; }
+    .close { position: absolute; top: 14px; right: 14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(18,18,18,.85); color: #fff; font-size: 21px; line-height: 1; cursor: pointer; }
+    .close:hover { background: var(--blue); }
+    .form { padding: 32px 34px 28px; }
+    .form h2 { margin: 0 0 20px; font-size: 22px; }
+    .form .field { margin-bottom: 15px; }
+    .form .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .photo { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 15px; }
+    .photo img { width: 96px; height: 64px; object-fit: cover; border-radius: 10px; }
+    .fmsg { min-height: 20px; font-size: 13px; color: #ff8a80; }
+    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
+    .cover { display: block; width: 100%; max-height: 320px; object-fit: cover; }
+    .read { padding: 28px 34px 32px; }
+    .read .ttag { display: inline-block; background: var(--blue-soft); color: #9db8ff; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 999px; }
+    .read h2 { font-size: 26px; line-height: 1.25; margin: 12px 0 12px; }
+    .read .meta { color: var(--text-3); font-size: 13px; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--line); display: flex; gap: 16px; flex-wrap: wrap; }
+    .read .body { white-space: pre-line; color: #d6d6d6; font-size: 15px; line-height: 1.8; overflow-wrap: anywhere; }
+    .read .ops { display: flex; gap: 8px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .confirm { padding: 30px 30px 26px; text-align: center; }
+    .confirm .ico { width: 54px; height: 54px; border-radius: 50%; background: rgba(229,72,77,.14); color: #ff8a80; display: grid; place-items: center; margin: 0 auto 16px; }
+    .confirm h2 { margin: 0 0 8px; font-size: 19px; }
+    .confirm p { margin: 0 0 18px; color: var(--text-3); font-size: 13.5px; }
+    .confirm .check { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -4px 0 18px; font-size: 13px; color: var(--text-2); }
+    .confirm .check input { accent-color: var(--red); width: 16px; height: 16px; }
+    .confirm .row-btns { display: flex; gap: 10px; justify-content: center; }
+
+    #toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); z-index: 90; background: #fff; color: #111; font-weight: 600; padding: 12px 22px; border-radius: 999px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    #toast.error { background: var(--red); color: #fff; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1100px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 860px) {
+      .shell { grid-template-columns: 1fr; }
+      .side { position: fixed; z-index: 40; left: 0; top: 0; width: 260px; transform: translateX(-100%); transition: transform .2s; }
+      .side.open { transform: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.6); }
+      .menu-btn { display: inline-grid; }
+      .main { padding: 0 18px 50px; }
+      .top { height: 72px; }
+      #adminName { display: none; }
+      .admin-pill { padding: 4px; }
+    }
+    @media (max-width: 560px) {
+      .stats { grid-template-columns: 1fr; }
+      .form .two { grid-template-columns: 1fr; }
+      .overlay { padding: 0; }
+      .sheet { border-radius: 0; min-height: 100%; }
+      .form, .read { padding: 26px 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<section class="login" id="loginView" hidden>
+  <form class="login-card" id="loginForm" novalidate>
+    <div class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6 3h7.5a4.5 4.5 0 0 1 3.2 7.66A4.75 4.75 0 0 1 14 20H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm2 2.5v4.25h5a2.12 2.12 0 0 0 0-4.25H8Zm0 6.75v5.25h5.75a2.62 2.62 0 0 0 0-5.25H8Z"/></svg></span>
+      <span>Spring<span style="color:var(--blue)">.</span>Blog</span>
+    </div>
+    <h1>Admin sign in</h1>
+    <p class="sub">Manage users, articles and comments.</p>
+    <div class="field">
+      <label class="lbl" for="aUser">Username</label>
+      <input class="in" id="aUser" autocomplete="username" placeholder="admin" />
+    </div>
+    <div class="field">
+      <label class="lbl" for="aPass">Password</label>
+      <input class="in" id="aPass" type="password" autocomplete="current-password" placeholder="••••" />
+    </div>
+    <button class="btn primary" id="loginBtn" type="submit">Sign in</button>
+    <div class="lmsg" id="lmsg" role="alert"></div>
+    <a class="back" href="index.html">← Back to the blog</a>
+  </form>
+</section>
+
+<!-- ================= PANEL ================= -->
+<div class="shell" id="panelView" hidden>
+  <aside class="side" id="side">
+    <div class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6 3h7.5a4.5 4.5 0 0 1 3.2 7.66A4.75 4.75 0 0 1 14 20H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm2 2.5v4.25h5a2.12 2.12 0 0 0 0-4.25H8Zm0 6.75v5.25h5.75a2.62 2.62 0 0 0 0-5.25H8Z"/></svg></span>
+      <span>Spring<span style="color:var(--blue)">.</span>Blog</span>
+    </div>
+    <div class="tagline">Admin</div>
+
+    <button class="nav-item" data-view="dashboard">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-view="posts">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>
+      Posts <span class="badge" id="bPosts">0</span>
+    </button>
+    <button class="nav-item" data-view="users">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg>
+      Users <span class="badge" id="bUsers">0</span>
+    </button>
+    <button class="nav-item" data-view="comments">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>
+      Comments <span class="badge" id="bComments">0</span>
+    </button>
+
+    <div class="spacer"></div>
+    <hr />
+    <a class="nav-item" href="index.html" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+      View site
+    </a>
+    <button class="nav-item" id="logoutBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      Log out
+    </button>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <button class="btn outline icon menu-btn" id="menuBtn" aria-label="Open menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div>
+        <div class="crumb">Admin / <span id="crumb">Dashboard</span></div>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="right">
+        <button class="btn outline sm" id="refreshBtn" title="Reload data">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8M21 3v5h-5"/></svg>Refresh
+        </button>
+        <span class="admin-pill"><span class="avatar">A</span><span id="adminName">admin</span></span>
+      </div>
+    </div>
+
+    <!-- ===== Dashboard ===== -->
+    <section id="v-dashboard" class="view">
+      <div class="stats">
+        <div class="stat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/></svg></div>
+          <div><div class="k">Total users</div><div class="v" id="sUsers">–</div></div></div>
+        <div class="stat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg></div>
+          <div><div class="k">Total posts</div><div class="v" id="sPosts">–</div></div></div>
+        <div class="stat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg></div>
+          <div><div class="k">Total comments</div><div class="v" id="sComments">–</div></div></div>
+        <div class="stat"><div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-8 7"/></svg></div>
+          <div><div class="k">Posts with photo</div><div class="v" id="sPhotos">–</div></div></div>
+      </div>
+      <div class="grid2">
+        <div class="box">
+          <h2>Recent posts <button class="linkbtn" data-goto="posts">View all</button></h2>
+          <div class="mini" id="recentPosts"></div>
+        </div>
+        <div class="box">
+          <h2>Posts by category</h2>
+          <div class="bars" id="catBars"></div>
+          <h2 style="margin-top:28px">Top authors <button class="linkbtn" data-goto="users">All users</button></h2>
+          <div class="mini" id="topAuthors"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Posts ===== -->
+    <section id="v-posts" class="view" hidden>
+      <div class="toolbar">
+        <label class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="pSearch" type="search" placeholder="Search title, content, author..." autocomplete="off" />
+        </label>
+        <select class="in" id="pCat" aria-label="Category"></select>
+        <span class="chip-filter" id="authorChip" hidden><span id="authorChipText"></span><button id="authorChipX" aria-label="Clear author filter">&times;</button></span>
+        <span class="count" id="pCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Post</th><th>Author</th><th>Category</th><th>Comments</th><th>Published</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="pBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Users ===== -->
+    <section id="v-users" class="view" hidden>
+      <div class="toolbar">
+        <label class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="uSearch" type="search" placeholder="Search username or email..." autocomplete="off" />
+        </label>
+        <select class="in" id="uType" aria-label="Login type">
+          <option value="ALL">All login types</option><option value="Google">Google</option><option value="Password">Password</option>
+        </select>
+        <span class="count" id="uCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>User</th><th>ID</th><th>Login</th><th>Posts</th><th>Comments</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="uBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Comments ===== -->
+    <section id="v-comments" class="view" hidden>
+      <div class="toolbar">
+        <label class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="cSearch" type="search" placeholder="Search comment, author or post..." autocomplete="off" />
+        </label>
+        <select class="in" id="cType" aria-label="Type">
+          <option value="ALL">Comments &amp; replies</option><option value="TOP">Comments only</option><option value="REPLY">Replies only</option>
+        </select>
+        <span class="count" id="cCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Author</th><th>Comment</th><th>On post</th><th>Type</th><th>Date</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="cBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Read post -->
+<div id="readBox" class="overlay" hidden role="dialog" aria-modal="true" aria-label="Post">
+  <div class="sheet" style="max-width:760px">
+    <button class="close" data-close aria-label="Close">&times;</button>
+    <div id="readBody"></div>
+  </div>
+</div>
+
+<!-- Edit post -->
+<div id="editBox" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="editTitle">
+  <div class="sheet">
+    <button class="close" data-close aria-label="Close">&times;</button>
+    <form class="form" id="editForm" novalidate>
+      <h2 id="editTitle">Edit post</h2>
+      <div class="field"><label class="lbl" for="eTitle">Title</label><input class="in" id="eTitle" maxlength="150" /></div>
+      <div class="two">
+        <div class="field"><label class="lbl" for="eCat">Category</label><select class="in" id="eCat"></select></div>
+        <div class="field"><label class="lbl" for="ePhoto">Change cover photo</label><input class="in" id="ePhoto" type="file" accept="image/*" /></div>
+      </div>
+      <div class="photo" id="ePreview" hidden><img id="eImg" alt="Cover" /><button type="button" class="btn outline sm" id="eRemove">Remove photo</button></div>
+      <div class="field"><label class="lbl" for="eContent">Content</label><textarea class="in" id="eContent" rows="11"></textarea></div>
+      <div class="fmsg" id="eMsg" role="alert"></div>
+      <div class="form-actions"><button type="button" class="btn outline" data-close>Cancel</button><button type="submit" class="btn primary" id="eSave">Save changes</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Reset password -->
+<div id="pwBox" class="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="pwTitle">
+  <div class="sheet" style="max-width:440px;margin-top:10vh">
+    <button class="close" data-close aria-label="Close">&times;</button>
+    <form class="form" id="pwForm" novalidate>
+      <h2 id="pwTitle">Reset password</h2>
+      <p style="margin:-10px 0 18px;color:var(--text-3);font-size:13.5px" id="pwFor"></p>
+      <div class="field"><label class="lbl" for="pwNew">New password</label><input class="in" id="pwNew" type="text" autocomplete="off" placeholder="At least 4 characters" /></div>
+      <div class="fmsg" id="pwMsg" role="alert"></div>
+      <div class="form-actions"><button type="button" class="btn outline" data-close>Cancel</button><button type="submit" class="btn primary" id="pwSave">Set password</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div id="confirmBox" class="overlay" hidden role="alertdialog" aria-modal="true" aria-labelledby="cfTitle">
+  <div class="sheet" style="max-width:430px;margin-top:12vh">
+    <div class="confirm">
+      <div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg></div>
+      <h2 id="cfTitle">Delete?</h2>
+      <p id="cfText"></p>
+      <label class="check" id="cfCheckWrap" hidden><input type="checkbox" id="cfCheck" checked /> <span id="cfCheckText"></span></label>
+      <div class="row-btns"><button class="btn outline" data-close>Cancel</button><button class="btn danger-solid" id="cfYes">Delete</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const API = "http://localhost:8080/api";
+  const CATEGORIES = ["Tech", "Travel", "Lifestyle", "Education", "Food"];
+  const CAT_COLOR = { Tech: "#2563ff", Travel: "#0fa3a3", Lifestyle: "#a855f7", Education: "#e0a100", Food: "#ec4899" };
+  const TITLES = { dashboard: "Dashboard", posts: "Posts", users: "Users", comments: "Comments" };
+
+  let token = sessionStorage.getItem("admin_token");
+  let view = "dashboard";
+  let data = { stats: null, posts: [], users: [], comments: [] };
+  let authorFilter = null;          // { id, name } when viewing one user's posts
+  let editId = null, editHadPhoto = false, editRemovePhoto = false;
+  let pwUserId = null;
+  let confirmAction = null;
+
+  const $ = id => document.getElementById(id);
+
+  /* ---------------- helpers ---------------- */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  }
+  function colorOf(c) { return CAT_COLOR[c] || "#667085"; }
+  function fmtDate(s) {
+    const d = new Date(s);
+    if (isNaN(d)) return "–";
+    const p = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} <span class="muted">${p(d.getHours())}:${p(d.getMinutes())}</span>`;
+  }
+  function excerpt(t, n) {
+    t = String(t || "").replace(/\s+/g, " ").trim();
+    return t.length <= n ? t : t.slice(0, n).replace(/\s+\S*$/, "") + " ...";
+  }
+  function hue(name) { let h = 0; for (const ch of String(name || "?")) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; }
+  function avatar(name, pic, size = 32) {
+    if (pic) return `<img class="avatar" style="width:${size}px;height:${size}px" referrerpolicy="no-referrer" src="${esc(pic)}" alt="" />`;
+    const h = hue(name);
+    return `<span class="avatar" style="width:${size}px;height:${size}px;background:hsl(${h} 70% 82%);color:hsl(${h} 60% 25%)">${esc(String(name || "?").charAt(0).toUpperCase())}</span>`;
+  }
+  function thumb(p) {
+    return `<div class="thumb">${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="" loading="lazy" />` : `<div class="ph" style="--c:${colorOf(p.category)}">${esc(String(p.category || "?").charAt(0))}</div>`}</div>`;
+  }
+  function catTag(c) { return `<span class="tag"><span class="dot" style="--c:${colorOf(c)}"></span>${esc(c)}</span>`; }
+  function toast(msg, type) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.className = "show" + (type === "error" ? " error" : "");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { t.className = ""; }, 3200);
+  }
+  const ICON = {
+    eye: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+    trash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>`,
+    key: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l3 3M15 8l2 2"/></svg>`,
+    list: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`
+  };
+
+  /* ---------------- API ---------------- */
+  async function api(path, opts = {}) {
+    const headers = Object.assign({}, opts.headers || {}, token ? { "X-Admin-Token": token } : {});
+    let res;
+    try {
+      res = await fetch(API + path, Object.assign({}, opts, { headers }));
+    } catch (e) {
+      throw new Error("Can’t reach the server. Is the Spring Boot app running on port 8080?");
+    }
+    let body = null;
+    try { body = await res.json(); } catch (e) {}
+    if (res.status === 401 && path !== "/admin/login") {
+      logout(true);
+      throw new Error("Session expired. Please sign in again.");
+    }
+    if (res.status === 404 && !(body && body.message)) {
+      throw new Error("Admin API not found (404). Put AdminController.java in the controller folder and restart the Spring Boot app.");
+    }
+    if (!res.ok) throw new Error((body && body.message) || ("Request failed (" + res.status + ")"));
+    return body;
+  }
+  const jsonOpts = (method, obj) => ({ method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(obj) });
+
+  /* ---------------- auth ---------------- */
+  function showLogin() {
+    $("panelView").hidden = true;
+    $("loginView").hidden = false;
+    setTimeout(() => $("aUser").focus(), 50);
+  }
+  function showPanel() {
+    $("loginView").hidden = true;
+    $("panelView").hidden = false;
+  }
+  async function login(e) {
+    e.preventDefault();
+    const username = $("aUser").value.trim(), password = $("aPass").value;
+    const msg = $("lmsg");
+    msg.textContent = "";
+    if (!username || !password) { msg.textContent = "Enter the admin username and password."; return; }
+    const btn = $("loginBtn");
+    btn.disabled = true; btn.textContent = "Signing in…";
+    try {
+      const r = await api("/admin/login", jsonOpts("POST", { username, password }));
+      token = r.token;
+      sessionStorage.setItem("admin_token", token);
+      $("adminName").textContent = r.username;
+      $("aPass").value = "";
+      showPanel();
+      go(location.hash.slice(1) || "dashboard");
+      loadAll();
+    } catch (err) {
+      msg.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = "Sign in";
+    }
+  }
+  function logout(expired) {
+    if (token && !expired) fetch(API + "/admin/logout", { method: "POST", headers: { "X-Admin-Token": token } }).catch(() => {});
+    token = null;
+    sessionStorage.removeItem("admin_token");
+    closeAll();
+    showLogin();
+    if (expired) $("lmsg").textContent = "Your session expired. Please sign in again.";
+  }
+
+  /* ---------------- navigation ---------------- */
+  function go(v) {
+    if (!TITLES[v]) v = "dashboard";
+    view = v;
+    document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "v-" + v);
+    document.querySelectorAll(".nav-item[data-view]").forEach(b => b.classList.toggle("on", b.dataset.view === v));
+    $("pageTitle").textContent = TITLES[v];
+    $("crumb").textContent = TITLES[v];
+    history.replaceState(null, "", "#" + v);
+    $("side").classList.remove("open");
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------- loading ---------------- */
+  function skeleton(id, cols) {
+    $(id).innerHTML = `<tr><td colspan="${cols}" style="padding:0"><div class="skel"></div><div class="skel"></div><div class="skel"></div></td></tr>`;
+  }
+  async function loadAll() {
+    skeleton("pBody", 6); skeleton("uBody", 6); skeleton("cBody", 6);
+    try {
+      const [stats, posts, users, comments] = await Promise.all([
+        api("/admin/stats"), api("/admin/posts"), api("/admin/users"), api("/admin/comments")
+      ]);
+      data = { stats, posts, users, comments };
+      renderAll();
+    } catch (err) {
+      if (!token) return;
+      toast(err.message, "error");
+      const fail = `<tr><td colspan="6"><div class="empty"><h3>Couldn’t load data</h3>${esc(err.message)}</div></td></tr>`;
+      $("pBody").innerHTML = fail; $("uBody").innerHTML = fail; $("cBody").innerHTML = fail;
+    }
+  }
+  async function reloadData() {
+    // refresh everything quietly after a change (keeps the current view)
+    try {
+      const [stats, posts, users, comments] = await Promise.all([
+        api("/admin/stats"), api("/admin/posts"), api("/admin/users"), api("/admin/comments")
+      ]);
+      data = { stats, posts, users, comments };
+      renderAll();
+    } catch (err) { toast(err.message, "error"); }
+  }
+
+  function renderAll() {
+    $("bPosts").textContent = data.posts.length;
+    $("bUsers").textContent = data.users.length;
+    $("bComments").textContent = data.comments.length;
+    renderDashboard();
+    renderPosts();
+    renderUsers();
+    renderComments();
+  }
+
+  /* ---------------- dashboard ---------------- */
+  function renderDashboard() {
+    const s = data.stats;
+    if (!s) return;
+    $("sUsers").innerHTML = `${s.users} <small>${s.googleUsers} Google</small>`;
+    $("sPosts").textContent = s.posts;
+    $("sComments").textContent = s.comments;
+    $("sPhotos").innerHTML = `${s.postsWithPhoto} <small>of ${s.posts}</small>`;
+
+    $("recentPosts").innerHTML = s.recentPosts.length ? s.recentPosts.map(p => `
+      <div class="mini-row">
+        ${thumb(p)}
+        <div class="t"><b>${esc(p.title)}</b><span>${esc(p.authorName)} · ${esc(p.category)}</span></div>
+        <button class="btn outline sm" data-read="${p.id}">${ICON.eye}View</button>
+      </div>`).join("") : `<div class="empty" style="padding:30px">No posts yet.</div>`;
+
+    const cats = Object.keys(Object.assign({}, ...CATEGORIES.map(c => ({ [c]: 0 })), s.byCategory));
+    const max = Math.max(1, ...cats.map(c => s.byCategory[c] || 0));
+    $("catBars").innerHTML = cats.map(c => {
+      const n = s.byCategory[c] || 0;
+      return `<div class="bar-row"><span class="name">${esc(c)}</span><div class="bar-track"><div class="bar-fill" style="--c:${colorOf(c)};width:${(n / max) * 100}%"></div></div><span class="n">${n}</span></div>`;
+    }).join("");
+
+    $("topAuthors").innerHTML = s.topAuthors.length ? s.topAuthors.map(a => `
+      <div class="mini-row">${avatar(a.name, null, 30)}<div class="t"><b>${esc(a.name)}</b></div><span class="num">${a.posts} ${a.posts === 1 ? "post" : "posts"}</span></div>`).join("")
+      : `<div class="empty" style="padding:20px">No authors yet.</div>`;
+  }
+
+  /* ---------------- posts ---------------- */
+  function renderPosts() {
+    const q = $("pSearch").value.trim().toLowerCase();
+    const cat = $("pCat").value || "ALL";
+    const list = data.posts.filter(p =>
+      (cat === "ALL" || p.category === cat) &&
+      (!authorFilter || p.authorId === authorFilter.id) &&
+      (!q || [p.title, p.content, p.authorName].some(x => String(x || "").toLowerCase().includes(q))));
+
+    $("authorChip").hidden = !authorFilter;
+    if (authorFilter) $("authorChipText").textContent = "Author: " + authorFilter.name;
+    $("pCount").textContent = `${list.length} of ${data.posts.length} posts`;
+
+    $("pBody").innerHTML = list.length ? list.map(p => `
+      <tr>
+        <td><div class="cell-post">${thumb(p)}<div><b>${esc(p.title)}</b><span>${esc(excerpt(p.content, 80))}</span></div></div></td>
+        <td><div class="who">${avatar(p.authorName, null, 28)}<div>${esc(p.authorName)}<small>ID ${esc(p.authorId)}</small></div></div></td>
+        <td>${catTag(p.category)}</td>
+        <td class="num-cell">${p.comments}</td>
+        <td style="white-space:nowrap">${fmtDate(p.createdAt)}</td>
+        <td class="actions">
+          <button class="btn outline sm" data-read="${p.id}">${ICON.eye}View</button>
+          <button class="btn outline sm" data-edit="${p.id}">${ICON.edit}Edit</button>
+          <button class="btn danger sm" data-del-post="${p.id}">${ICON.trash}Delete</button>
+        </td>
+      </tr>`).join("")
+      : `<tr><td colspan="6"><div class="empty"><h3>No posts found</h3>${data.posts.length ? "Try another search or filter." : "Nobody has published anything yet."}</div></td></tr>`;
+  }
+
+  function readPost(id) {
+    const p = data.posts.find(x => x.id === id) || (data.stats && data.stats.recentPosts.find(x => x.id === id));
+    if (!p) return;
+    $("readBody").innerHTML = `
+      ${p.imageUrl ? `<img class="cover" src="${esc(p.imageUrl)}" alt="" />` : ""}
+      <div class="read">
+        <span class="ttag">${esc(p.category)}</span>
+        <h2>${esc(p.title)}</h2>
+        <div class="meta"><span>By <b style="color:#fff">${esc(p.authorName)}</b> (ID ${esc(p.authorId)})</span><span>${fmtDate(p.createdAt)}</span><span>${p.comments != null ? p.comments + " comments" : ""}</span></div>
+        <div class="body">${esc(p.content)}</div>
+        <div class="ops">
+          <a class="btn outline sm" href="index.html#post-${p.id}" target="_blank" rel="noopener">${ICON.eye}Open on site</a>
+          <button class="btn outline sm" data-edit="${p.id}">${ICON.edit}Edit</button>
+          <button class="btn danger sm" data-del-post="${p.id}">${ICON.trash}Delete</button>
+        </div>
+      </div>`;
+    openBox("readBox");
+  }
+
+  function setPreview(src) {
+    const old = $("eImg").getAttribute("src");
+    if (old && old.startsWith("blob:")) URL.revokeObjectURL(old);
+    if (src) { $("eImg").src = src; $("ePreview").hidden = false; }
+    else { $("eImg").removeAttribute("src"); $("ePreview").hidden = true; }
+  }
+  function editPost(id) {
+    const p = data.posts.find(x => x.id === id);
+    if (!p) return;
+    closeBox("readBox");
+    editId = id; editHadPhoto = !!p.imageUrl; editRemovePhoto = false;
+    $("editForm").reset();
+    $("eMsg").textContent = "";
+    $("eTitle").value = p.title || "";
+    $("eContent").value = p.content || "";
+    $("eCat").value = CATEGORIES.includes(p.category) ? p.category : CATEGORIES[0];
+    $("editTitle").textContent = `Edit post by ${p.authorName}`;
+    setPreview(p.imageUrl || null);
+    openBox("editBox");
+    setTimeout(() => $("eTitle").focus(), 60);
+  }
+  async function saveEdit(e) {
+    e.preventDefault();
+    const title = $("eTitle").value.trim(), content = $("eContent").value.trim(), photo = $("ePhoto").files[0];
+    const msg = $("eMsg");
+    msg.textContent = "";
+    if (!title) { msg.textContent = "Title is required."; return; }
+    if (!content) { msg.textContent = "Content is required."; return; }
+    if (photo && photo.size > 10 * 1024 * 1024) { msg.textContent = "Photo is larger than 10 MB."; return; }
+    const fd = new FormData();
+    fd.append("title", title);
+    fd.append("content", content);
+    fd.append("category", $("eCat").value);
+    if (photo) fd.append("photo", photo);
+    else if (editRemovePhoto) fd.append("removePhoto", "true");
+    const btn = $("eSave");
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      await api(`/admin/posts/${editId}`, { method: "POST", body: fd });
+      closeBox("editBox");
+      await reloadData();
+      toast("Post updated");
+    } catch (err) {
+      msg.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = "Save changes";
+    }
+  }
+  function deletePost(id) {
+    const p = data.posts.find(x => x.id === id);
+    if (!p) return;
+    askConfirm({
+      title: "Delete this post?",
+      text: `“${p.title}” by ${p.authorName} and its ${p.comments} comment(s) will be permanently removed.`,
+      run: async () => {
+        await api(`/admin/posts/${id}`, { method: "DELETE" });
+        closeBox("readBox");
+        toast("Post deleted");
+      }
+    });
+  }
+
+  /* ---------------- users ---------------- */
+  function renderUsers() {
+    const q = $("uSearch").value.trim().toLowerCase();
+    const type = $("uType").value;
+    const list = data.users.filter(u =>
+      (type === "ALL" || u.loginType === type) &&
+      (!q || [u.username, u.email].some(x => String(x || "").toLowerCase().includes(q))));
+    $("uCount").textContent = `${list.length} of ${data.users.length} users`;
+    $("uBody").innerHTML = list.length ? list.map(u => `
+      <tr>
+        <td><div class="who">${avatar(u.username, u.picture, 34)}<div><b>${esc(u.username)}</b><small>${esc(u.email || "No email")}</small></div></div></td>
+        <td class="muted">#${u.id}</td>
+        <td><span class="pill ${u.loginType === "Google" ? "google" : ""}">${u.loginType}</span></td>
+        <td class="num-cell">${u.posts}</td>
+        <td class="num-cell">${u.comments}</td>
+        <td class="actions">
+          <button class="btn outline sm" data-user-posts="${u.id}" ${u.posts ? "" : "disabled style=\"opacity:.4;cursor:default\""}>${ICON.list}Posts</button>
+          ${u.loginType === "Password" ? `<button class="btn outline sm" data-pw="${u.id}">${ICON.key}Password</button>` : ""}
+          <button class="btn danger sm" data-del-user="${u.id}">${ICON.trash}Delete</button>
+        </td>
+      </tr>`).join("")
+      : `<tr><td colspan="6"><div class="empty"><h3>No users found</h3>${data.users.length ? "Try another search." : "Nobody has signed up yet."}</div></td></tr>`;
+  }
+  function showUserPosts(id) {
+    const u = data.users.find(x => x.id === id);
+    if (!u) return;
+    authorFilter = { id: u.id, name: u.username };
+    $("pSearch").value = ""; $("pCat").value = "ALL";
+    renderPosts();
+    go("posts");
+  }
+  function openPw(id) {
+    const u = data.users.find(x => x.id === id);
+    if (!u) return;
+    pwUserId = id;
+    $("pwForm").reset();
+    $("pwMsg").textContent = "";
+    $("pwFor").textContent = `Set a new password for ${u.username}.`;
+    openBox("pwBox");
+    setTimeout(() => $("pwNew").focus(), 60);
+  }
+  async function savePw(e) {
+    e.preventDefault();
+    const pw = $("pwNew").value;
+    if (pw.length < 4) { $("pwMsg").textContent = "Password must be at least 4 characters."; return; }
+    const btn = $("pwSave");
+    btn.disabled = true;
+    try {
+      await api(`/admin/users/${pwUserId}/password`, jsonOpts("POST", { password: pw }));
+      closeBox("pwBox");
+      toast("Password updated");
+    } catch (err) {
+      $("pwMsg").textContent = err.message;
+    } finally { btn.disabled = false; }
+  }
+  function deleteUser(id) {
+    const u = data.users.find(x => x.id === id);
+    if (!u) return;
+    askConfirm({
+      title: `Delete ${u.username}?`,
+      text: "The user won’t be able to sign in with this account any more.",
+      check: u.posts ? `Also delete their ${u.posts} post(s) and those posts’ comments` : null,
+      run: async (alsoPosts) => {
+        const r = await api(`/admin/users/${id}?deletePosts=${u.posts ? !!alsoPosts : true}`, { method: "DELETE" });
+        if (authorFilter && authorFilter.id === id) authorFilter = null;
+        toast(r.postsDeleted ? `User and ${r.postsDeleted} post(s) deleted` : "User deleted");
+      }
+    });
+  }
+
+  /* ---------------- comments ---------------- */
+  function renderComments() {
+    const q = $("cSearch").value.trim().toLowerCase();
+    const type = $("cType").value;
+    const list = data.comments.filter(c =>
+      (type === "ALL" || (type === "TOP" ? c.parentId == null : c.parentId != null)) &&
+      (!q || [c.content, c.authorName, c.postTitle].some(x => String(x || "").toLowerCase().includes(q))));
+    $("cCount").textContent = `${list.length} of ${data.comments.length}`;
+    $("cBody").innerHTML = list.length ? list.map(c => `
+      <tr>
+        <td><div class="who">${avatar(c.authorName, null, 28)}${esc(c.authorName)}</div></td>
+        <td><div class="comment-text">${esc(c.content)}</div></td>
+        <td>${data.posts.some(p => p.id === c.postId) ? `<button class="linkbtn" data-read="${c.postId}" style="text-align:left">${esc(excerpt(c.postTitle, 40))}</button>` : `<span class="muted">${esc(c.postTitle)}</span>`}</td>
+        <td><span class="pill ${c.parentId != null ? "reply" : ""}">${c.parentId != null ? "Reply" : "Comment"}</span></td>
+        <td style="white-space:nowrap">${fmtDate(c.createdAt)}</td>
+        <td class="actions"><button class="btn danger sm" data-del-comment="${c.id}">${ICON.trash}Delete</button></td>
+      </tr>`).join("")
+      : `<tr><td colspan="6"><div class="empty"><h3>No comments found</h3>${data.comments.length ? "Try another search or filter." : "No one has commented yet."}</div></td></tr>`;
+  }
+  function deleteComment(id) {
+    const c = data.comments.find(x => x.id === id);
+    if (!c) return;
+    const replies = data.comments.filter(x => x.parentId === id).length;
+    askConfirm({
+      title: "Delete this comment?",
+      text: `${c.authorName}: “${excerpt(c.content, 90)}”${replies ? ` — its ${replies} repl${replies === 1 ? "y" : "ies"} will be deleted too.` : ""}`,
+      run: async () => {
+        await api(`/admin/comments/${id}`, { method: "DELETE" });
+        toast("Comment deleted");
+      }
+    });
+  }
+
+  /* ---------------- overlays ---------------- */
+  function openBox(id) {
+    const el = $(id);
+    el.hidden = false;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => el.classList.add("show"));
+  }
+  function closeBox(id) {
+    const el = $(id);
+    if (el.hidden) return;
+    el.classList.remove("show");
+    setTimeout(() => {
+      el.hidden = true;
+      if ([...document.querySelectorAll(".overlay")].every(o => o.hidden)) document.body.style.overflow = "";
+    }, 180);
+  }
+  function closeAll() { document.querySelectorAll(".overlay").forEach(o => closeBox(o.id)); }
+
+  function askConfirm({ title, text, check, run }) {
+    $("cfTitle").textContent = title;
+    $("cfText").textContent = text;
+    $("cfCheckWrap").hidden = !check;
+    $("cfCheck").checked = true;
+    if (check) $("cfCheckText").textContent = check;
+    confirmAction = run;
+    openBox("confirmBox");
+    setTimeout(() => $("cfYes").focus(), 60);
+  }
+  async function runConfirm() {
+    if (!confirmAction) return;
+    const btn = $("cfYes");
+    btn.disabled = true; btn.textContent = "Deleting…";
+    try {
+      await confirmAction($("cfCheck").checked);
+      confirmAction = null;
+      closeBox("confirmBox");
+      await reloadData();
+    } catch (err) {
+      toast(err.message, "error");
+    } finally {
+      btn.disabled = false; btn.textContent = "Delete";
+    }
+  }
+
+  /* ---------------- events ---------------- */
+  document.addEventListener("click", e => {
+    const t = e.target;
+    const nav = t.closest("[data-view]");
+    if (nav) { if (nav.dataset.view === "posts") { authorFilter = null; renderPosts(); } go(nav.dataset.view); return; }
+    const gt = t.closest("[data-goto]");
+    if (gt) { if (gt.dataset.goto === "posts") { authorFilter = null; renderPosts(); } go(gt.dataset.goto); return; }
+    const rd = t.closest("[data-read]");
+    if (rd) { readPost(Number(rd.dataset.read)); return; }
+    const ed = t.closest("[data-edit]");
+    if (ed) { editPost(Number(ed.dataset.edit)); return; }
+    const dp = t.closest("[data-del-post]");
+    if (dp) { deletePost(Number(dp.dataset.delPost)); return; }
+    const up = t.closest("[data-user-posts]");
+    if (up && !up.disabled) { showUserPosts(Number(up.dataset.userPosts)); return; }
+    const pw = t.closest("[data-pw]");
+    if (pw) { openPw(Number(pw.dataset.pw)); return; }
+    const du = t.closest("[data-del-user]");
+    if (du) { deleteUser(Number(du.dataset.delUser)); return; }
+    const dc = t.closest("[data-del-comment]");
+    if (dc) { deleteComment(Number(dc.dataset.delComment)); return; }
+    if (t.closest("#cfYes")) { runConfirm(); return; }
+    const cl = t.closest("[data-close]");
+    if (cl) { closeBox(cl.closest(".overlay").id); return; }
+    if (t.classList.contains("overlay")) { closeBox(t.id); return; }
+    if (t.closest("#authorChipX")) { authorFilter = null; renderPosts(); return; }
+    if (t.closest("#logoutBtn")) { logout(false); return; }
+    if (t.closest("#refreshBtn")) { loadAll().then(() => toast("Data refreshed")); return; }
+    if (t.closest("#menuBtn")) { $("side").classList.toggle("open"); return; }
+    if ($("side").classList.contains("open") && !t.closest("#side")) $("side").classList.remove("open");
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    const open = [...document.querySelectorAll(".overlay")].filter(o => !o.hidden);
+    if (open.length) closeBox(open[open.length - 1].id);
+  });
+  $("loginForm").addEventListener("submit", login);
+  $("editForm").addEventListener("submit", saveEdit);
+  $("pwForm").addEventListener("submit", savePw);
+  ["pSearch", "pCat"].forEach(id => $(id).addEventListener("input", renderPosts));
+  ["uSearch", "uType"].forEach(id => $(id).addEventListener("input", renderUsers));
+  ["cSearch", "cType"].forEach(id => $(id).addEventListener("input", renderComments));
+  $("ePhoto").addEventListener("change", e => {
+    const f = e.target.files[0];
+    if (f) setPreview(URL.createObjectURL(f));
+    else { const p = data.posts.find(x => x.id === editId); setPreview(!editRemovePhoto && p ? p.imageUrl : null); }
+  });
+  $("eRemove").addEventListener("click", () => { $("ePhoto").value = ""; if (editHadPhoto) editRemovePhoto = true; setPreview(null); });
+
+  /* ---------------- start ---------------- */
+  $("pCat").innerHTML = `<option value="ALL">All categories</option>` + CATEGORIES.map(c => `<option>${c}</option>`).join("");
+  $("eCat").innerHTML = CATEGORIES.map(c => `<option>${c}</option>`).join("");
+  (async () => {
+    if (!token) { showLogin(); return; }
+    try {
+      const r = await api("/admin/check");
+      $("adminName").textContent = r.username;
+      showPanel();
+      go(location.hash.slice(1) || "dashboard");
+      loadAll();
+    } catch (e) {
+      showLogin();
+    }
+  })();
+</script>
+</body>
+</html>
